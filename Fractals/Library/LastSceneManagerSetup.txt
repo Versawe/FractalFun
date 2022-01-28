@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/Test.unity
+- path: Assets/Scenes/Mandelbrot2D.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
