@@ -37,8 +37,8 @@ public class Explorer : MonoBehaviour
 
     private void HandleInputs() 
     {
-        if (Input.GetKey(KeyCode.Q)) angle -= .025f;
-        if (Input.GetKey(KeyCode.E)) angle += .025f;
+        if (Input.GetKey(KeyCode.Q)) angle += .025f;
+        if (Input.GetKey(KeyCode.E)) angle -= .025f;
 
         Vector2 dir = new Vector2(.01f * scale, 0);
         float s = Mathf.Sin(angle);

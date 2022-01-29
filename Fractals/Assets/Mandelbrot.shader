@@ -8,6 +8,7 @@ Shader "Explorer/Mandelbrot"
         _MaxIter("Interations", range(4, 1000)) = 255
         _Color("Color", range(0, 1)) = .5
         _Repeat("Repeat", float) = 1
+        _Speed("Speed", float) = 1
     }
     SubShader
     {
@@ -62,18 +63,34 @@ Shader "Explorer/Mandelbrot"
             {
                 float2 c = _Area.xy + (i.uv-.5)*_Area.zw;
                 c = rot(c, _Area.xy, _Angle);
-                float2 z;
-                float iter;
 
+                float r = 20; //escape radius
+                float r2 = r * r;
+
+                float2 z, zPrevious;
+                float iter;
                 for(iter = 0; iter < _MaxIter; iter ++)
                 {
+                    zPrevious = z;
                     z = float2(z.x*z.x-z.y*z.y, 2*z.x*z.y) + c;
-                    if (length(z) > 2) break;
+
+                    if (dot(z, zPrevious) > r2) break;
                 }
                 if (iter > _MaxIter) return 0;
+
+                float dist = length(z); //distance from origin
+                float fracIter = (dist - r) / (r2 - r);
+                fracIter = log2 (log(dist) / log(r) ); //double expo inter
+
                 float m = sqrt(iter / _MaxIter);
-                float4 col = sin(float4(.3, .45, .65, 1) * m*20) * .5+.5; //procedual colors
-                col = tex2D(_MainTex, float2(m*_Repeat, _Color));
+                float4 col = sin(float4(.3, .45, .65, 1)*m*20)*.5+.5; //procedual colors
+                col = tex2D(_MainTex, float2(m*_Repeat + _Time.y, _Color));
+
+                float angle = atan2(z.x, z.y); // -pi and pi
+                //if(i.uv.x>.5)
+                col *= smoothstep(3, 0, fracIter);
+
+                col *= 1+sin(angle * 2)*.2;
                 return col;
             }
 
