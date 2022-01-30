@@ -9,6 +9,7 @@ Shader "Explorer/Mandelbrot"
         _Color("Color", range(0, 1)) = .5
         _Repeat("Repeat", float) = 1
         _Speed("Speed", float) = 1
+        _Symmetry("_Symmetry", range(0,1)) = 1
     }
     SubShader
     {
@@ -45,7 +46,7 @@ Shader "Explorer/Mandelbrot"
 
             float4 _Area;
             sampler2D _MainTex;
-            float _Angle, _MaxIter, _Color, _Repeat;
+            float _Angle, _MaxIter, _Color, _Repeat, _Symmetry;
 
             float2 rot(float2 p, float2 pivot, float a)
             {
@@ -61,7 +62,14 @@ Shader "Explorer/Mandelbrot"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float2 c = _Area.xy + (i.uv-.5)*_Area.zw;
+                float2 uv = i.uv - .5;
+                //uv.x = abs(uv);
+                //uv = rot(uv, 0, .25*3.1415);
+                //uv = abs(uv);
+
+                //uv = lerp(i.uv - .5, uv, _Symmetry);
+
+                float2 c = _Area.xy + uv * _Area.zw;
                 c = rot(c, _Area.xy, _Angle);
 
                 float r = 20; //escape radius
@@ -71,7 +79,7 @@ Shader "Explorer/Mandelbrot"
                 float iter;
                 for(iter = 0; iter < _MaxIter; iter ++)
                 {
-                    zPrevious = z;
+                    zPrevious = rot(z,0, _Time.y);
                     z = float2(z.x*z.x-z.y*z.y, 2*z.x*z.y) + c;
 
                     if (dot(z, zPrevious) > r2) break;
@@ -90,7 +98,7 @@ Shader "Explorer/Mandelbrot"
                 //if(i.uv.x>.5)
                 col *= smoothstep(3, 0, fracIter);
 
-                col *= 1+sin(angle * 2)*.2;
+                col *= 1+sin(angle * 2+_Time.y*4)*.2;
                 return col;
             }
 
